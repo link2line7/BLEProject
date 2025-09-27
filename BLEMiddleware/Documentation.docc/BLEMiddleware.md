@@ -131,6 +131,10 @@ func bleMiddleware(_ middleware: BLEMiddleware, didDisconnectPeripheral peripher
 ### Protocols
 - ``BLEMiddlewareDelegate``
 
+### Advanced Features
+- <doc:DeviceNameStability>
+- <doc:ErrorHandling>
+
 ### Error Handling
 - Connection failures are reported through delegate methods
 - State changes provide context for error conditions

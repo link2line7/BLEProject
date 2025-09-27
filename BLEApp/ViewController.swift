@@ -83,9 +83,12 @@ extension ViewController: UITableViewDataSource {
         if let originalDict = peripheral.manufactureData {
             jsonString = originalDict.map { String(format: "%02X", $0) }.joined(separator: " ")
         }
-        cell.nameLabel.text = peripheral.name ?? "Unknown Device"
+        
+        // Use cached advertised name to prevent name changes after connection
+        cell.nameLabel.text = peripheral.displayName
         cell.idLabel.text = peripheral.identifier.uuidString
         cell.advLabel.text = jsonString
+        
         cell.connectButtonClickClosure = { [weak self]  in
             guard let self = self else {return}
             if peripheral.isConnected {
