@@ -37,6 +37,9 @@ The `BLEPeripheral` class represents a discovered BLE peripheral.
 - **name**: `String?`
   
   The name of the peripheral, if available.
+- **manufactureData**: `Data?`
+  
+  The manufactureData of the peripheral, if available.
 
 - **isConnected**: `Bool`
   

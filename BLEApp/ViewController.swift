@@ -10,9 +10,9 @@ import BLEMiddleware
 import CoreBluetooth
 
 class ViewController: UIViewController {
+    @IBOutlet weak var tableView: UITableView!
     
     private let bleMiddleware = BLEMiddleware()
-    private var tableView: UITableView!
     private var statusLabel: UILabel!
     private var scanButton: UIButton!
     
@@ -41,10 +41,8 @@ class ViewController: UIViewController {
         view.addSubview(scanButton)
         
         // Table view
-        tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "PeripheralCell")
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
@@ -56,11 +54,6 @@ class ViewController: UIViewController {
             
             scanButton.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 20),
             scanButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            tableView.topAnchor.constraint(equalTo: scanButton.bottomAnchor, constant: 20),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
@@ -82,14 +75,30 @@ extension ViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "PeripheralCell", for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: BLETableViewCell.identifier, for: indexPath) as? BLETableViewCell else {
+            return UITableViewCell()
+        }
         let peripheral = bleMiddleware.discoveredPeripherals[indexPath.row]
-        
-        let name = peripheral.name ?? "Unknown Device"
-        let status = peripheral.isConnected ? "Connected" : "Disconnected"
-        cell.textLabel?.text = "\(name) - \(status)"
-        cell.detailTextLabel?.text = peripheral.identifier.uuidString
-        
+        var jsonString = ""
+        if let originalDict = peripheral.manufactureData {
+            jsonString = originalDict.map { String(format: "%02X", $0) }.joined(separator: " ")
+        }
+        cell.nameLabel.text = peripheral.name ?? "Unknown Device"
+        cell.idLabel.text = peripheral.identifier.uuidString
+        cell.advLabel.text = jsonString
+        cell.connectButtonClickClosure = { [weak self]  in
+            guard let self = self else {return}
+            if peripheral.isConnected {
+                self.bleMiddleware.disconnectFromPeripheral(peripheral)
+            } else {
+                self.bleMiddleware.connectToPeripheral(peripheral)
+            }
+        }
+        if peripheral.isConnected {
+            cell.connectButton.setTitle("Disconnect", for: .normal)
+        }else {
+            cell.connectButton.setTitle("Connect", for: .normal)
+        }
         return cell
     }
 }
@@ -98,14 +107,6 @@ extension ViewController: UITableViewDataSource {
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
-        let peripheral = bleMiddleware.discoveredPeripherals[indexPath.row]
-        
-        if peripheral.isConnected {
-            bleMiddleware.disconnectFromPeripheral(peripheral)
-        } else {
-            bleMiddleware.connectToPeripheral(peripheral)
-        }
     }
 }
 

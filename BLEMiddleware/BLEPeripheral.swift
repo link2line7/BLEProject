@@ -21,6 +21,7 @@ import Foundation
 /// ### Peripheral Properties
 /// - ``identifier``
 /// - ``name``
+/// - ``manufactureData``
 /// - ``isConnected``
 /// - ``cbPeripheral``
 public class BLEPeripheral {
@@ -33,11 +34,14 @@ public class BLEPeripheral {
         return cbPeripheral?.name
     }
     
+    /// The manufactureData of the peripheral, if available.
+    public var manufactureData: Data?
+    
     /// Indicates whether this peripheral is currently connected.
     public var isConnected: Bool = false
     
     /// The underlying Core Bluetooth peripheral object.
-    public weak var cbPeripheral: CBPeripheral?
+    public var cbPeripheral: CBPeripheral?
     
     /// Initializes a BLE peripheral with a Core Bluetooth peripheral.
     ///

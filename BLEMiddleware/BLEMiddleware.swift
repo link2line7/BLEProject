@@ -99,8 +99,8 @@ public class BLEMiddleware: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         let blePeripheral = BLEPeripheral(cbPeripheral: peripheral)
-        
         if !_discoveredPeripherals.contains(where: { $0.identifier == blePeripheral.identifier }) {
+            blePeripheral.manufactureData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data
             _discoveredPeripherals.append(blePeripheral)
             delegate?.bleMiddleware(self, didDiscoverPeripheral: blePeripheral)
         }

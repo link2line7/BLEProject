@@ -19,6 +19,8 @@
 		A9484DE82E86E350005F4866 /* BLEPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9484DE62E86E350005F4866 /* BLEPeripheral.swift */; };
 		A9484DE92E86E350005F4866 /* BLEMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9484DE72E86E350005F4866 /* BLEMiddleware.swift */; };
 		A9484DEB2E86E4B3005F4866 /* Documentation.docc in Sources */ = {isa = PBXBuildFile; fileRef = A9484DEA2E86E4B3005F4866 /* Documentation.docc */; };
+		A9484DF72E875F8D005F4866 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A9484DF62E875F8D005F4866 /* Main.storyboard */; };
+		A9484DF92E87659E005F4866 /* BLETableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9484DF82E87659E005F4866 /* BLETableViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +68,8 @@
 		A9484DE62E86E350005F4866 /* BLEPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLEPeripheral.swift; sourceTree = "<group>"; };
 		A9484DE72E86E350005F4866 /* BLEMiddleware.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLEMiddleware.swift; sourceTree = "<group>"; };
 		A9484DEA2E86E4B3005F4866 /* Documentation.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Documentation.docc; sourceTree = "<group>"; };
+		A9484DF62E875F8D005F4866 /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		A9484DF82E87659E005F4866 /* BLETableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLETableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,9 +115,11 @@
 				1A1A1A1B1A1A1A1A /* AppDelegate.swift */,
 				1A1A1A1D1A1A1A1A /* SceneDelegate.swift */,
 				1A1A1A1F1A1A1A1A /* ViewController.swift */,
+				A9484DF82E87659E005F4866 /* BLETableViewCell.swift */,
 				1A1A1A211A1A1A1A /* Assets.xcassets */,
 				1A1A1A231A1A1A1A /* LaunchScreen.storyboard */,
 				1A1A1A381A1A1A1A /* Info.plist */,
+				A9484DF62E875F8D005F4866 /* Main.storyboard */,
 			);
 			path = BLEApp;
 			sourceTree = "<group>";
@@ -262,6 +268,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9484DF72E875F8D005F4866 /* Main.storyboard in Resources */,
 				1A1A1A221A1A1A1A /* LaunchScreen.storyboard in Resources */,
 				1A1A1A201A1A1A1A /* Assets.xcassets in Resources */,
 			);
@@ -289,6 +296,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A1A1A1E1A1A1A1A /* ViewController.swift in Sources */,
+				A9484DF92E87659E005F4866 /* BLETableViewCell.swift in Sources */,
 				1A1A1A1A1A1A1A1A /* AppDelegate.swift in Sources */,
 				1A1A1A1C1A1A1A1A /* SceneDelegate.swift in Sources */,
 			);
