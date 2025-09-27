@@ -1,6 +1,6 @@
 //
-//  ViewController.swift
-//  BLEAPP
+//  BLEMiddleware.swift
+//  BLEMiddleware
 //
 //  Created by antonio on 2025/9/25.
 //
@@ -14,38 +14,77 @@ import Foundation
 /// connection management, and peripheral interactions. It implements the Core Bluetooth delegate
 /// protocols to manage the underlying Bluetooth operations.
 ///
+/// Use this class to:
+/// - Discover nearby BLE peripherals
+/// - Connect to and disconnect from peripherals
+/// - Monitor Bluetooth state changes
+/// - Receive notifications about peripheral events
+///
+/// ## Usage Example
+///
+/// ```swift
+/// let middleware = BLEMiddleware()
+/// middleware.delegate = self
+/// middleware.discoverPeripherals()
+/// ```
+///
+/// ## Important Notes
+///
+/// - Ensure Bluetooth permissions are granted in your app's Info.plist
+/// - The middleware automatically manages the underlying CBCentralManager
+/// - All delegate callbacks are called on the main queue
+///
 /// ## Topics
 ///
 /// ### Creating a Middleware Instance
 /// - ``init()``
 ///
-/// ### Managing Peripherals
+/// ### Managing Discovery
 /// - ``discoverPeripherals()``
 /// - ``stopDiscovery()``
+///
+/// ### Managing Connections
 /// - ``connectToPeripheral(_:)``
 /// - ``disconnectFromPeripheral(_:)``
 ///
-/// ### Accessing Discovered Peripherals
+/// ### Accessing Peripherals
 /// - ``discoveredPeripherals``
 /// - ``connectedPeripherals``
 ///
-/// ### Delegate Methods
+/// ### Delegate Communication
+/// - ``delegate``
 /// - ``BLEMiddlewareDelegate``
 public class BLEMiddleware: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
-    /// Delegate to receive BLE middleware events
+    /// The delegate object that receives middleware events.
+    ///
+    /// Set this property to receive notifications about Bluetooth state changes,
+    /// peripheral discovery, connection events, and disconnection events.
+    ///
+    /// - Important: The delegate methods are called on the main queue.
     public weak var delegate: BLEMiddlewareDelegate?
     
     private var centralManager: CBCentralManager!
     private var _discoveredPeripherals: [BLEPeripheral] = []
     private var _connectedPeripherals: [BLEPeripheral] = []
     
-    /// Array of discovered BLE peripherals
+    /// Array of discovered BLE peripherals.
+    ///
+    /// This array contains all peripherals that have been discovered during scanning.
+    /// Peripherals remain in this array even after scanning stops, until the middleware
+    /// instance is deallocated.
+    ///
+    /// - Returns: An array of ``BLEPeripheral`` objects representing discovered devices.
     public var discoveredPeripherals: [BLEPeripheral] {
         return _discoveredPeripherals
     }
     
-    /// Array of connected BLE peripherals
+    /// Array of currently connected BLE peripherals.
+    ///
+    /// This array contains only peripherals that are currently connected.
+    /// When a peripheral disconnects, it is automatically removed from this array.
+    ///
+    /// - Returns: An array of ``BLEPeripheral`` objects representing connected devices.
     public var connectedPeripherals: [BLEPeripheral] {
         return _connectedPeripherals
     }
@@ -53,7 +92,12 @@ public class BLEMiddleware: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     /// Initializes a new BLE middleware instance.
     ///
     /// Creates a central manager and sets up the middleware for BLE operations.
-    /// The central manager will automatically check for Bluetooth availability.
+    /// The central manager will automatically check for Bluetooth availability and
+    /// notify the delegate of the initial state.
+    ///
+    /// - Note: The initialization process is asynchronous. Wait for the
+    ///   ``BLEMiddlewareDelegate/bleMiddleware(_:didUpdateState:)`` callback
+    ///   with `.poweredOn` state before starting operations.
     public override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
@@ -62,22 +106,42 @@ public class BLEMiddleware: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     /// Starts discovering BLE peripherals.
     ///
     /// Begins scanning for nearby BLE devices. Discovered devices will be added to
-    /// the `discoveredPeripherals` array and reported through the delegate.
+    /// the ``discoveredPeripherals`` array and reported through the
+    /// ``BLEMiddlewareDelegate/bleMiddleware(_:didDiscoverPeripheral:)`` delegate method.
     ///
-    /// - Note: Bluetooth must be powered on before calling this method.
+    /// The scan continues until ``stopDiscovery()`` is called or the app is backgrounded.
+    /// Duplicate discoveries of the same peripheral are automatically filtered out.
+    ///
+    /// - Important: Bluetooth must be powered on before calling this method.
+    ///   Check the state via the delegate callback before starting discovery.
+    ///
+    /// - Note: Scanning consumes battery power. Stop scanning when not needed.
     public func discoverPeripherals() {
         guard centralManager.state == .poweredOn else { return }
         centralManager.scanForPeripherals(withServices: nil, options: nil)
     }
     
     /// Stops the peripheral discovery process.
+    ///
+    /// Call this method to stop scanning for BLE peripherals. This helps conserve
+    /// battery power when discovery is no longer needed.
+    ///
+    /// Previously discovered peripherals remain in the ``discoveredPeripherals`` array.
     public func stopDiscovery() {
         centralManager.stopScan()
     }
     
     /// Connects to a specified BLE peripheral.
     ///
-    /// - Parameter peripheral: The BLE peripheral to connect to.
+    /// Initiates a connection to the specified peripheral. The connection result
+    /// will be reported through the delegate methods:
+    /// - ``BLEMiddlewareDelegate/bleMiddleware(_:didConnectPeripheral:)`` on success
+    /// - ``BLEMiddlewareDelegate/bleMiddleware(_:didDisconnectPeripheral:error:)`` on failure
+    ///
+    /// - Parameter peripheral: The BLE peripheral to connect to. Must be a peripheral
+    ///   from the ``discoveredPeripherals`` array.
+    ///
+    /// - Important: The peripheral must have been discovered before attempting connection.
     public func connectToPeripheral(_ peripheral: BLEPeripheral) {
         guard let cbPeripheral = peripheral.cbPeripheral else { return }
         centralManager.connect(cbPeripheral, options: nil)
@@ -85,7 +149,14 @@ public class BLEMiddleware: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     
     /// Disconnects from a specified BLE peripheral.
     ///
-    /// - Parameter peripheral: The BLE peripheral to disconnect from.
+    /// Terminates the connection to the specified peripheral. The disconnection
+    /// will be reported through the
+    /// ``BLEMiddlewareDelegate/bleMiddleware(_:didDisconnectPeripheral:error:)`` delegate method.
+    ///
+    /// - Parameter peripheral: The BLE peripheral to disconnect from. Must be a peripheral
+    ///   from the ``connectedPeripherals`` array.
+    ///
+    /// - Note: If the peripheral is not connected, this method has no effect.
     public func disconnectFromPeripheral(_ peripheral: BLEPeripheral) {
         guard let cbPeripheral = peripheral.cbPeripheral else { return }
         centralManager.cancelPeripheralConnection(cbPeripheral)
