@@ -57,6 +57,12 @@ public class BLEPeripheral {
     /// - Note: The identifier is assigned by the system and cannot be changed.
     public let identifier: UUID
     
+    /// The cached name from advertisement data.
+    ///
+    /// This property stores the device name from the initial advertisement,
+    /// preventing name changes that can occur after connection.
+    public var advertisedName: String?
+    
     /// The name of the peripheral, if available.
     ///
     /// Returns the peripheral's advertised name or the name stored in the system.
@@ -66,6 +72,22 @@ public class BLEPeripheral {
     /// - Returns: The peripheral's name, or `nil` if not available.
     public var name: String? {
         return cbPeripheral?.name
+    }
+    
+    /// Gets the display name, preferring the cached advertised name.
+    ///
+    /// This method returns the most stable name for display purposes,
+    /// prioritizing the name from advertisement data over the current name.
+    ///
+    /// - Returns: The best available name for display.
+    public var displayName: String {
+        if let advertisedName = advertisedName, !advertisedName.isEmpty {
+            return advertisedName
+        }
+        if let currentName = name, !currentName.isEmpty {
+            return currentName
+        }
+        return "Unknown Device"
     }
     
     /// The manufacturer data from the peripheral's advertisement packet.

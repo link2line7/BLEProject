@@ -171,7 +171,16 @@ public class BLEMiddleware: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         let blePeripheral = BLEPeripheral(cbPeripheral: peripheral)
         if !_discoveredPeripherals.contains(where: { $0.identifier == blePeripheral.identifier }) {
+            // Cache advertisement data
             blePeripheral.manufactureData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data
+            
+            // Cache advertised device name
+            if let advertisedName = advertisementData[CBAdvertisementDataLocalNameKey] as? String {
+                blePeripheral.advertisedName = advertisedName
+            } else if let currentName = peripheral.name {
+                blePeripheral.advertisedName = currentName
+            }
+            
             _discoveredPeripherals.append(blePeripheral)
             delegate?.bleMiddleware(self, didDiscoverPeripheral: blePeripheral)
         }
