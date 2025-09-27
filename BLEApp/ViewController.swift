@@ -78,6 +78,9 @@ extension ViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: BLETableViewCell.identifier, for: indexPath) as? BLETableViewCell else {
             return UITableViewCell()
         }
+        guard indexPath.row < bleMiddleware.discoveredPeripherals.count else {
+            return UITableViewCell()
+        }
         let peripheral = bleMiddleware.discoveredPeripherals[indexPath.row]
         var jsonString = ""
         if let originalDict = peripheral.manufactureData {
